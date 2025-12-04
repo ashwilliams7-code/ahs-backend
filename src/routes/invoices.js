@@ -1,7 +1,7 @@
 import express from 'express'
 import multer from 'multer'
 import { v4 as uuidv4 } from 'uuid'
-import { supabase } from '../index.js'
+import { supabase } from '../lib/supabase.js'
 
 const router = express.Router()
 const upload = multer({ storage: multer.memoryStorage() })

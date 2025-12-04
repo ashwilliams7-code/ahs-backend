@@ -1,7 +1,12 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import { createClient } from '@supabase/supabase-js'
+
+dotenv.config()
+
+// Supabase client (shared)
+import { supabase } from './lib/supabase.js'
+export { supabase }
 
 // Routes
 import invoiceRoutes from './routes/invoices.js'
@@ -9,16 +14,10 @@ import workerRoutes from './routes/workers.js'
 import activityRoutes from './routes/activity.js'
 import dashboardRoutes from './routes/dashboard.js'
 import complianceRoutes from './routes/compliance.js'
-
-dotenv.config()
+import applymateRoutes from './routes/applymate.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
-
-// Supabase client
-const supabaseUrl = process.env.SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'placeholder-key'
-export const supabase = createClient(supabaseUrl, supabaseKey)
 
 // Middleware
 app.use(cors({
@@ -50,6 +49,7 @@ app.use('/api/workers', workerRoutes)
 app.use('/api/activity', activityRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/compliance', complianceRoutes)
+app.use('/api/applymate', applymateRoutes)
 
 // Admin email for demo data
 const ADMIN_EMAIL = 'ash.williams7@icloud.com'
