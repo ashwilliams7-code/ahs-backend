@@ -1,0 +1,21 @@
+# Render Blueprint for AHS Backend
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: ahs-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+    healthCheckPath: /api/health
+
