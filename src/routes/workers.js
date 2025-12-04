@@ -3,7 +3,11 @@ import { supabase } from '../index.js'
 
 const router = express.Router()
 
-// Demo workers data
+// Admin email for demo data
+const ADMIN_EMAIL = 'ash.williams7@icloud.com'
+const isAdmin = (user) => user?.email === ADMIN_EMAIL
+
+// Demo workers data for admin only
 const DEMO_WORKERS = [
   { id: 1, name: 'Sarah Mitchell', initials: 'SM', color: 'blue', role: 'Support Worker • Full-time', status: 'Available', hours: 32 },
   { id: 2, name: 'Emily Roberts', initials: 'ER', color: 'green', role: 'Support Worker • Full-time', status: 'Available', hours: 40 },
@@ -22,17 +26,30 @@ const DEMO_WORKERS = [
 // Get all workers
 router.get('/', async (req, res) => {
   try {
+    const userId = req.user?.id
+    
+    // Admin sees demo data
+    if (isAdmin(req.user)) {
+      return res.json(DEMO_WORKERS)
+    }
+    
+    // Other users see their own workers
+    if (!userId) {
+      return res.json([])
+    }
+    
     const { data, error } = await supabase
       .from('workers')
       .select('*')
+      .eq('user_id', userId)
       .order('name')
 
     if (error) throw error
 
-    res.json(data && data.length > 0 ? data : DEMO_WORKERS)
+    res.json(data || [])
   } catch (err) {
-    console.log('Using demo workers:', err.message)
-    res.json(DEMO_WORKERS)
+    console.log('Workers error:', err.message)
+    res.json([])
   }
 })
 

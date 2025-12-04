@@ -6,21 +6,40 @@ import { supabase } from '../index.js'
 const router = express.Router()
 const upload = multer({ storage: multer.memoryStorage() })
 
-// Demo invoices for fallback
+// Admin email - only this account sees demo data
+const ADMIN_EMAIL = 'ash.williams7@icloud.com'
+
+// Demo invoices for admin only
 const DEMO_INVOICES = [
-  { invoice_number: 'INV-20241128143022', worker_name: 'Sarah Mitchell', client_name: 'Jane Doe', total_amount: 540.48, created_at: '2024-11-28' },
-  { invoice_number: 'INV-20241128112015', worker_name: 'Emily Roberts', client_name: 'Mark Wilson', total_amount: 675.60, created_at: '2024-11-28' },
-  { invoice_number: 'INV-20241127163042', worker_name: 'James Kim', client_name: 'Lisa Chen', total_amount: 405.36, created_at: '2024-11-27' },
-  { invoice_number: 'INV-20241127091122', worker_name: 'Mike Thompson', client_name: 'Jane Doe', total_amount: 810.72, created_at: '2024-11-27' },
-  { invoice_number: 'INV-20241126154533', worker_name: 'Angela Patel', client_name: 'Tom Brown', total_amount: 472.92, created_at: '2024-11-26' },
+  { invoice_number: 'INV-20241128143022', worker_name: 'Sarah Mitchell', client_name: 'Jane Doe', total_amount: 540.48, status: 'paid', created_at: '2024-11-28' },
+  { invoice_number: 'INV-20241128112015', worker_name: 'Emily Roberts', client_name: 'Mark Wilson', total_amount: 675.60, status: 'pending', created_at: '2024-11-28' },
+  { invoice_number: 'INV-20241127163042', worker_name: 'James Kim', client_name: 'Lisa Chen', total_amount: 405.36, status: 'paid', created_at: '2024-11-27' },
+  { invoice_number: 'INV-20241127091122', worker_name: 'Mike Thompson', client_name: 'Jane Doe', total_amount: 810.72, status: 'paid', created_at: '2024-11-27' },
+  { invoice_number: 'INV-20241126154533', worker_name: 'Angela Patel', client_name: 'Tom Brown', total_amount: 472.92, status: 'overdue', created_at: '2024-11-26' },
 ]
+
+// Check if user is admin
+const isAdmin = (user) => user?.email === ADMIN_EMAIL
 
 // Get all invoices
 router.get('/', async (req, res) => {
   try {
+    const userId = req.user?.id
+    
+    // Admin sees demo data
+    if (isAdmin(req.user)) {
+      return res.json({ invoices: DEMO_INVOICES })
+    }
+    
+    // Other users see their own data
+    if (!userId) {
+      return res.json({ invoices: [] })
+    }
+    
     const { data, error } = await supabase
       .from('invoices')
       .select('*')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(50)
 
@@ -28,7 +47,7 @@ router.get('/', async (req, res) => {
 
     res.json({ invoices: data || [] })
   } catch (err) {
-    console.log('Using demo invoices:', err.message)
+    console.log('Invoices error:', err.message)
     res.json({ invoices: [] })
   }
 })

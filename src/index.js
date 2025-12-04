@@ -51,25 +51,46 @@ app.use('/api/activity', activityRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/compliance', complianceRoutes)
 
+// Admin email for demo data
+const ADMIN_EMAIL = 'ash.williams7@icloud.com'
+const isAdmin = (user) => user?.email === ADMIN_EMAIL
+
 // Service breakdown endpoint
 app.get('/api/service-breakdown', (req, res) => {
+  // Admin sees demo data
+  if (isAdmin(req.user)) {
+    return res.json([
+      { name: 'Personal Care', percentage: 45, color: 'primary' },
+      { name: 'Community Access', percentage: 25, color: 'accent' },
+      { name: 'Domestic Assistance', percentage: 18, color: 'blue' },
+      { name: 'Transport', percentage: 12, color: 'purple' },
+    ])
+  }
+  
+  // New users see empty breakdown
   res.json([
-    { name: 'Personal Care', percentage: 45, color: 'primary' },
-    { name: 'Community Access', percentage: 25, color: 'accent' },
-    { name: 'Domestic Assistance', percentage: 18, color: 'blue' },
-    { name: 'Transport', percentage: 12, color: 'purple' },
+    { name: 'Personal Care', percentage: 0, color: 'primary' },
+    { name: 'Community Access', percentage: 0, color: 'accent' },
+    { name: 'Domestic Assistance', percentage: 0, color: 'blue' },
+    { name: 'Transport', percentage: 0, color: 'purple' },
   ])
 })
 
 // Top performers endpoint
 app.get('/api/top-performers', (req, res) => {
-  res.json([
-    { name: 'Sarah Mitchell', initials: 'SM', color: 'blue', hours: 40, shifts: 8, earnings: 2702.40, trend: 12 },
-    { name: 'Emily Roberts', initials: 'ER', color: 'green', hours: 38, shifts: 7, earnings: 2567.28, trend: 8 },
-    { name: 'Angela Patel', initials: 'AP', color: 'pink', hours: 36, shifts: 6, earnings: 2432.16, trend: 5 },
-    { name: 'Tom Nguyen', initials: 'TN', color: 'cyan', hours: 34, shifts: 6, earnings: 2297.04, trend: 0 },
-    { name: 'Daniel Wilson', initials: 'DW', color: 'indigo', hours: 32, shifts: 5, earnings: 2161.92, trend: 0 },
-  ])
+  // Admin sees demo data
+  if (isAdmin(req.user)) {
+    return res.json([
+      { name: 'Sarah Mitchell', initials: 'SM', color: 'blue', hours: 40, shifts: 8, earnings: 2702.40, trend: 12 },
+      { name: 'Emily Roberts', initials: 'ER', color: 'green', hours: 38, shifts: 7, earnings: 2567.28, trend: 8 },
+      { name: 'Angela Patel', initials: 'AP', color: 'pink', hours: 36, shifts: 6, earnings: 2432.16, trend: 5 },
+      { name: 'Tom Nguyen', initials: 'TN', color: 'cyan', hours: 34, shifts: 6, earnings: 2297.04, trend: 0 },
+      { name: 'Daniel Wilson', initials: 'DW', color: 'indigo', hours: 32, shifts: 5, earnings: 2161.92, trend: 0 },
+    ])
+  }
+  
+  // New users see empty list
+  res.json([])
 })
 
 // Health check
