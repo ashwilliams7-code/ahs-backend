@@ -51,15 +51,20 @@ app.use(express.json())
 // Auth middleware to extract user from token
 app.use(async (req, res, next) => {
   const authHeader = req.headers.authorization
+  console.log('🔐 Auth header present:', !!authHeader)
+  
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7)
+    console.log('🔐 Token length:', token.length)
     try {
       const { data: { user }, error } = await supabase.auth.getUser(token)
+      console.log('🔐 Supabase auth result - user:', !!user, 'error:', error?.message)
       if (!error && user) {
         req.user = user
+        console.log('🔐 User authenticated:', user.email)
       }
     } catch (err) {
-      console.log('Auth error:', err.message)
+      console.log('🔐 Auth error:', err.message)
     }
   }
   next()
