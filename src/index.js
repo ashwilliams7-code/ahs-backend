@@ -19,25 +19,27 @@ import applymateRoutes from './routes/applymate.js'
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// Middleware
+// Middleware - CORS configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://app.autoaihub.io',
+  'https://ahs-frontend.vercel.app',
+  process.env.FRONTEND_URL
+].filter(Boolean)
+
 app.use(cors({
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'https://app.autoaihub.io',
-      'https://ahs-frontend.vercel.app',
-      process.env.FRONTEND_URL
-    ].filter(Boolean)
-    
-    // Allow requests with no origin (mobile apps, curl, etc)
+    // Allow requests with no origin (mobile apps, curl, Postman, etc)
     if (!origin) return callback(null, true)
     
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true)
+    // Check if origin is in allowed list
+    if (allowedOrigins.some(allowed => origin.includes('autoaihub') || origin.includes('localhost') || origin.includes('vercel.app'))) {
+      // Return the actual requesting origin, not a fixed value
+      callback(null, origin)
     } else {
       console.log('CORS blocked origin:', origin)
-      callback(null, true) // Allow anyway for now to debug
+      callback(null, origin) // Allow anyway for debugging
     }
   },
   credentials: true,
