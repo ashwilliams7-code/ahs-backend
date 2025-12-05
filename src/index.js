@@ -21,14 +21,28 @@ const PORT = process.env.PORT || 3001
 
 // Middleware
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://app.autoaihub.io',
-    'https://ahs-frontend.vercel.app',
-    process.env.FRONTEND_URL
-  ].filter(Boolean),
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://app.autoaihub.io',
+      'https://ahs-frontend.vercel.app',
+      process.env.FRONTEND_URL
+    ].filter(Boolean)
+    
+    // Allow requests with no origin (mobile apps, curl, etc)
+    if (!origin) return callback(null, true)
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      console.log('CORS blocked origin:', origin)
+      callback(null, true) // Allow anyway for now to debug
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }))
 app.use(express.json())
 
